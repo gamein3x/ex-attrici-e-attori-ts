@@ -7,16 +7,16 @@ type Person = {
   image: string
 };
 
-type ActressNationality = 
-    "American"
-    | "British"
-    | "Australian"
-    | "South African"
-    | "French"
-    | "Indian"
-    | "Spanish"
-    | "South Korean"
-    | "Chinese";
+type ActressNationality =
+  "American"
+  | "British"
+  | "Australian"
+  | "South African"
+  | "French"
+  | "Indian"
+  | "Spanish"
+  | "South Korean"
+  | "Chinese";
 
 const nationalityArray = [
   "American",
@@ -36,7 +36,7 @@ type Actress = Person & {
   nationality: ActressNationality
 }
 
-function isActress(dati: unknown): dati is Actress{
+function isActress(dati: unknown): dati is Actress {
   return (
     typeof dati === "object" && dati !== null &&
     "id" in dati && typeof dati.id === "number" &&
@@ -53,19 +53,42 @@ function isActress(dati: unknown): dati is Actress{
   )
 }
 
-async function getActress(id:number) {
+async function getActress(id: number): Promise < Actress | null > {
   try {
-    const response = await fetch(`http://localhost:3333/${id}`);
+    const response = await fetch(`http://localhost:3333/actresses/${id}`);
     const dati: unknown = await response.json();
-    if (!isActress(dati) || dati === undefined){
-      throw new Error("Formato dati non valido");
+    if(!isActress(dati) || dati === undefined){
+  throw new Error("Formato dati non valido");
+}
+return dati;
+  } catch (error) {
+  if (error instanceof Error) {
+    console.error("Errore durante il recupero dell'attrice", error.message);
+  } else {
+    console.error("Errore sconosciuto:", error);
+  }
+  return null;
+}
+}
+
+async function getAllActresses(): Promise<Actress[]> {
+  try {
+    const response = await fetch(`http://localhost:3333/actresses/${id}`);
+    if (!response.ok) {
+      throw new Error(`Errore HTTP ${response.status}: ${response.statusText}`);
     }
-    return dati;
-  } catch(error) {
-    if (error instanceof Error){
-      console.error("Errore durante il recupero dell'attrice", error.message);
+    const dati: unknown = await response.json();
+    if (!(dati instanceof Array)){
+      throw new Error(`I dati non sono un array (content: ${dati})`);
+    }
+    const attriciValide: Actress[] = dati.filter(actor => isActress(actor));
+    return attriciValide;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Errore durante il recupero delle attrici", error.message);
     } else {
       console.error("Errore sconosciuto:", error)
     }
+    return [];
   }
 }
